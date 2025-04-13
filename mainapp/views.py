@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .models import Teacher
 
-class LoginAPIView(APIView):
-    def post(self, request):
+@api_view(["POST"])
+def login(request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data["username"]
@@ -34,3 +36,10 @@ class LoginAPIView(APIView):
             else:
                 return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([IsAuthenticated])
+def validate_token(request):
+    """
+    Function-based view to validate JWT token.
+    """
+    return Response({"valid": True}, status=status.HTTP_200_OK)
