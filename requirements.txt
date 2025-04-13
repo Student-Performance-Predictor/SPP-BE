@@ -5,3 +5,4 @@ psycopg2-binary>=2.9
 python-decouple>=3.8
 bcrypt>=4.0
 drf-spectacular>=0.26.2
+django-cors-headers>=4.3.1
