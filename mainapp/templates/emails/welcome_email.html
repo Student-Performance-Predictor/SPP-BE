@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to EduMet</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo {
+            color: #3a7bd5;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        .credentials {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3a7bd5;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3a7bd5;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">EduMet</div>
+            <h2>Welcome {{ name }},</h2>
+        </div>
+        
+        <p>We're excited to inform you that you've been added as a <strong>Principal</strong> of <strong>{{ school }}</strong> to the EduMet platform. This role gives you access to powerful tools to manage your institution.</p>
+        
+        <div class="credentials">
+            <p>Here are your login credentials:</p>
+            <ul>
+                <li><strong>Username:</strong> {{ username }}</li>
+                <li><strong>Email:</strong> {{ email }}</li>
+                <li><strong>Password:</strong> {{ password }}</li>
+            </ul>
+        </div>
+
+        <p>For security reasons, we recommend that you:</p>
+        <ul>
+            <li>Change your password immediately after first login</li>
+            <li>Never share your credentials with anyone</li>
+        </ul>
+
+        <p>If you have any questions or need assistance, please don't hesitate to contact our support team on edumetspp@gmail.com.</p>
+
+        <div class="footer">
+            <p>Best regards,<br><strong>The EduMet Admin Team</strong></p>
+            <p style="font-size: 12px; color: #95a5a6;">
+                © {{ current_year }} EduMet Platform. All rights reserved.<br>
+                If you didn't request this account, please contact us immediately.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
