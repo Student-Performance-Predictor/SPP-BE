@@ -48,3 +48,19 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "pin_code": "000000"
             }
         )
+
+class School(models.Model):
+    name = models.CharField(max_length=100)
+    school_type = models.CharField(max_length=50)
+    board = models.CharField(max_length=50)
+    medium = models.CharField(max_length=50)
+    registration_number = models.CharField(max_length=50, unique=True)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    address = models.TextField()
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    pincode = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"{self.name}"
