@@ -5,7 +5,8 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class User(AbstractUser):
-    pass  # already includes username, password, email, etc.
+    email = models.EmailField(unique=True)
+    REQUIRED_FIELDS = ["email"]
 
 
 class Teacher(models.Model):
@@ -25,7 +26,8 @@ class Teacher(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
-    pin_code = models.CharField(max_length=10)
+    pincode = models.CharField(max_length=10)
+    profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.type})"
@@ -45,7 +47,7 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "address": "Onsite",
                 "city": "administry",
                 "state": "administration",
-                "pin_code": "000000"
+                "pincode": "000000"
             }
         )
 
