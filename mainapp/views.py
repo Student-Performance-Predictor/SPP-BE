@@ -178,6 +178,7 @@ def add_principal(request):
             email = teacher_data["email"],
             date_of_birth = teacher_data["date_of_birth"],
             school = teacher_data["school"],
+            school_id = teacher_data["school_id"],
             address = teacher_data["address"],
             city = teacher_data["city"],
             state = teacher_data["state"],
@@ -206,8 +207,14 @@ def add_principal(request):
             recipient_email=email
         )
 
-        return Response(TeacherSerializer(teacher).data,status=status.HTTP_201_CREATED)
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+                "message":"Principal credentials sent to his/her mail address!",
+                "data":TeacherSerializer(teacher).data
+            },status=status.HTTP_201_CREATED)
+    return Response({
+        "message": "Failed to add school.",
+        "errors": serializer.errors
+    },status=status.HTTP_400_BAD_REQUEST)
 
 # View Principal by Id
 @api_view(["GET"])
@@ -238,7 +245,10 @@ def update_principal(request, pk):
             user.email = serializer.validated_data["email"]
         user.save()
         return Response({"message":"Principal updated successfully!"},status=status.HTTP_200_OK)
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    return Response({
+        "message": "Failed to add school.",
+        "errors": serializer.errors
+    },status=status.HTTP_400_BAD_REQUEST)
 
 # Delete Principal by Id
 @api_view(["DELETE"])
@@ -251,4 +261,4 @@ def delete_principal(request, pk):
     if teacher.profile_image and os.path.isfile(teacher.profile_image.path):
         os.remove(teacher.profile_image.path)
     teacher.user.delete()
-    return Response({"message":"Principal deleted Successfully"},status=status.HTTP_204_NO_CONTENT)
+    return Response({"message":"Principal deleted Successfully"},status=status.HTTP_200_OK)
