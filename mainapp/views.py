@@ -261,4 +261,19 @@ def delete_principal(request, pk):
     if teacher.profile_image and os.path.isfile(teacher.profile_image.path):
         os.remove(teacher.profile_image.path)
     teacher.user.delete()
+
+    email_subject = "Goodbye from EduMet - Account Has Been Permanently Removed"
+    email_context = {
+        'name': teacher.name,
+        'email': teacher.email,
+        'current_year': datetime.datetime.now().year
+    }
+
+    send_email_sync(
+        subject=email_subject,
+        template_name='emails/delete_teacher.html', 
+        context=email_context, 
+        recipient_email=teacher.email
+    )
+    
     return Response({"message":"Principal deleted Successfully"},status=status.HTTP_200_OK)
