@@ -20,7 +20,7 @@ class Teacher(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=20, choices=TEACHER_TYPE_CHOICES)
     email = models.EmailField()
-    phone_number = models.CharField(max_length=15)
+    phone = models.CharField(max_length=15)
     date_of_birth = models.DateField()
     school = models.CharField(max_length=100)
     address = models.TextField()
@@ -41,7 +41,7 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "name": "Admin",
                 "type": "admin",
                 "email": instance.email,
-                "phone_number": "6395780245",
+                "phone": "6395780245",
                 "date_of_birth": datetime.strptime("25-11-2005", "%d-%m-%Y").date(),
                 "school": "edumet",
                 "address": "Onsite",

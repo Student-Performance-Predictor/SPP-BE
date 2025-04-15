@@ -148,6 +148,14 @@ def delete_school(request, pk):
     school.delete()
     return Response({"message":"School deleted successfully"},status=status.HTTP_204_NO_CONTENT)
 
+# Get all Principals
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_principals(request):
+    principal = Teacher.objects.filter(type="principal")
+    serializer = TeacherSerializer(principal, many=True)
+    return Response(serializer.data)
+
 # Add Principal
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -166,7 +174,7 @@ def add_principal(request):
             user=user,
             name = teacher_data["name"],
             type = "principal",
-            phone_number = teacher_data["phone_number"],
+            phone = teacher_data["phone"],
             email = teacher_data["email"],
             date_of_birth = teacher_data["date_of_birth"],
             school = teacher_data["school"],
