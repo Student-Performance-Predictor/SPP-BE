@@ -96,9 +96,7 @@ def get_all_schools(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_school(request):
-    print(request)
     serializer = SchoolSerializer(data=request.data)
-    print(serializer)
     if serializer.is_valid():
         serializer.save()
         return Response(
