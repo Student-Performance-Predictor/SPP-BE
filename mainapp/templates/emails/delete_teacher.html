@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your EduMet Account Has Been Deleted</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo {
+            color: #3a7bd5;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        .notice {
+            background-color: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3a7bd5;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">EduMet</div>
+            <h2>Your Account Has Been Deleted</h2>
+        </div>
+        
+        <p>Dear {{ name }},</p>
+        
+        <div class="notice">
+            <p>We're writing to confirm that your EduMet account associated with <strong>{{ email }}</strong> has been permanently deleted from our system as per your request.</p>
+        </div>
+
+        <p>Please note the following consequences of account deletion:</p>
+        <ul>
+            <li>All your personal data has been removed from our active databases</li>
+            <li>You will no longer have access to EduMet platform features</li>
+        </ul>
+
+        <p>If this action was taken in error or you wish to recover your account, please contact our support team immediately at <strong>edumetspp@gmail.com</strong>.</p>
+
+        <p>Note that we may retain certain information for legal or administrative purposes as required by our data retention policy.</p>
+
+        <div class="footer">
+            <p>Best regards,<br><strong>The EduMet Admin Team</strong></p>
+            <p style="font-size: 12px; color: #95a5a6;">
+                © {{ current_year }} EduMet Platform. All rights reserved.<br>
+                This is an automated message - please do not reply directly to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

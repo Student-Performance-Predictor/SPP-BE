@@ -23,6 +23,7 @@ class Teacher(models.Model):
     phone = models.CharField(max_length=15)
     date_of_birth = models.DateField()
     school = models.CharField(max_length=100)
+    school_id = models.CharField(max_length=100)
     address = models.TextField()
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
@@ -47,7 +48,8 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "address": "Onsite",
                 "city": "administry",
                 "state": "administration",
-                "pincode": "000000"
+                "pincode": "000000",
+                "school_id": "0"
             }
         )
 
