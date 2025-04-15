@@ -146,7 +146,7 @@ def delete_school(request, pk):
     except School.DoesNotExist:
         return Response({"error":"School not found"},status=status.HTTP_404_NOT_FOUND)
     school.delete()
-    return Response({"message":"School deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+    return Response({"message":"School deleted successfully!"},status=status.HTTP_200_OK)
 
 # Get all Principals
 @api_view(['GET'])
