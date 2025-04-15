@@ -75,6 +75,23 @@ def validate_token(request):
     """
     return Response({"valid": True}, status=status.HTTP_200_OK)
 
+# Get all schools names
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_school_names_with_id(request):
+    schools = School.objects.all().values("id", "name")
+    return Response({
+        "schools": list(schools)
+    }, status=status.HTTP_200_OK)
+
+# Get all Schools
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_schools(request):
+    schools = School.objects.all()
+    serializer = SchoolSerializer(schools, many=True)
+    return Response(serializer.data)
+
 # Add School
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -82,8 +99,15 @@ def add_school(request):
     serializer = SchoolSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
-    return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "message":"School added successfully!",
+                "data":serializer.data
+            },status=status.HTTP_201_CREATED)
+    return Response({
+        "message": "Failed to add school.",
+        "errors": serializer.errors
+    },status=status.HTTP_400_BAD_REQUEST)
 
 # View School by Id
 @api_view(["GET"])
@@ -108,7 +132,10 @@ def update_school(request, pk):
     if serializer.is_valid():
         serializer.save()
         return Response({"message":"School updated successfully!"},status=status.HTTP_200_OK)
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    return Response({
+        "message": "Failed to add school.",
+        "errors": serializer.errors
+    },status=status.HTTP_400_BAD_REQUEST)
 
 # Delete School by Id
 @api_view(["DELETE"])
