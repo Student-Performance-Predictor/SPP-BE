@@ -55,7 +55,7 @@ def add_principal(request):
 
         email_subject = "EduMet Account Login Credentials"
         email_context = {
-            'type': teacher.type,
+            'type': 'Principal',
             'name': teacher.name,
             'email': teacher.email,
             'username': username,

@@ -9,18 +9,18 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 import os, datetime
 
-
+# Get All Teachers
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_class_teachers(request):
     teachers = Teacher.objects.filter(type="class_teacher")
     serializer = TeacherSerializer(teachers, many=True)
     return Response(serializer.data)
 
 
-# 2. Add a Class Teacher
+# Add Teacher
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def add_class_teacher(request):
     serializer = TeacherSerializer(data=request.data)
     if serializer.is_valid():
@@ -58,6 +58,7 @@ def add_class_teacher(request):
 
         email_subject = "EduMet Account Login Credentials"
         email_context = {
+            'type': 'Class Teacher',
             'name': teacher.name,
             'email': teacher.email,
             'username': username,
@@ -74,7 +75,7 @@ def add_class_teacher(request):
         )
 
         return Response({
-            "message": "Class Teacher credentials sent to their mail address!",
+            "message": "Class Teacher credentials sent to his/her mail address!",
             "data": TeacherSerializer(teacher).data
         }, status=status.HTTP_201_CREATED)
 
@@ -84,9 +85,9 @@ def add_class_teacher(request):
     }, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 3. View Class Teacher by ID
+# View Teacher by Id
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def view_class_teacher(request, pk):
     try:
         teacher = Teacher.objects.get(pk=pk, type="class_teacher")
@@ -97,9 +98,9 @@ def view_class_teacher(request, pk):
     return Response(serializer.data)
 
 
-# 4. Update Class Teacher by ID
+# Update Teacher by Id
 @api_view(['PUT'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def update_class_teacher(request, pk):
     try:
         teacher = Teacher.objects.get(pk=pk, type="class_teacher")
@@ -123,9 +124,9 @@ def update_class_teacher(request, pk):
     }, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 5. Delete Class Teacher by ID
+# Delete Teacher by Id
 @api_view(['DELETE'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def delete_class_teacher(request, pk):
     try:
         teacher = Teacher.objects.get(pk=pk, type="class_teacher")
