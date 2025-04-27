@@ -5,12 +5,10 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class User(AbstractUser):
-    username = models.CharField(max_length=150, unique=False)  # override, not unique
+    username = models.CharField(max_length=150, unique=False)
     email = models.EmailField(unique=True)
-
-    USERNAME_FIELD = 'email'        # <-- login will be based on email now
-    REQUIRED_FIELDS = []            # <-- username is not required
-
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
     def __str__(self):
         return self.email
 
@@ -29,14 +27,12 @@ class Teacher(models.Model):
     date_of_birth = models.DateField()
     school = models.CharField(max_length=100)
     school_id = models.CharField(max_length=100)
+    class_assigned = models.CharField(max_length=50, null=True, blank=True)
     address = models.TextField()
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
     pincode = models.CharField(max_length=10)
     profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
-    
-    # 🔥 New field added
-    class_assigned = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.type})"
