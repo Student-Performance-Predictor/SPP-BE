@@ -5,9 +5,14 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class User(AbstractUser):
+    username = models.CharField(max_length=150, unique=False)  # override, not unique
     email = models.EmailField(unique=True)
-    REQUIRED_FIELDS = ["email"]
 
+    USERNAME_FIELD = 'email'        # <-- login will be based on email now
+    REQUIRED_FIELDS = []            # <-- username is not required
+
+    def __str__(self):
+        return self.email
 
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
@@ -29,6 +34,9 @@ class Teacher(models.Model):
     state = models.CharField(max_length=50)
     pincode = models.CharField(max_length=10)
     profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    
+    # 🔥 New field added
+    class_assigned = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.type})"
@@ -49,7 +57,8 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "city": "administry",
                 "state": "administration",
                 "pincode": "000000",
-                "school_id": "0"
+                "school_id": "0",
+                "class_assigned": "admin_class"
             }
         )
 
