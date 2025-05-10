@@ -5,9 +5,12 @@ from django.dispatch import receiver
 from datetime import datetime
 
 class User(AbstractUser):
+    username = models.CharField(max_length=150, unique=False)
     email = models.EmailField(unique=True)
-    REQUIRED_FIELDS = ["email"]
-
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    def __str__(self):
+        return self.email
 
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
@@ -24,6 +27,7 @@ class Teacher(models.Model):
     date_of_birth = models.DateField()
     school = models.CharField(max_length=100)
     school_id = models.CharField(max_length=100)
+    class_assigned = models.CharField(max_length=50, null=True, blank=True)
     address = models.TextField()
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
@@ -49,7 +53,8 @@ def create_admin_teacher(sender, instance, created, **kwargs):
                 "city": "administry",
                 "state": "administration",
                 "pincode": "000000",
-                "school_id": "0"
+                "school_id": "0",
+                "class_assigned": "admin_class"
             }
         )
 
