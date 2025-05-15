@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import School, Teacher, Class, ClassWorkingDay
+from .models import School, Teacher, Class, ClassWorkingDay, Attendance
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -16,6 +16,21 @@ class TeacherSerializer(serializers.ModelSerializer):
         model = Teacher
         # fields = '__all__'
         exclude = ['user','type']
+
+class StudentAttendanceSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    student_id = serializers.CharField()
+    email = serializers.EmailField()
+    phone = serializers.CharField()
+    status = serializers.ChoiceField(choices=['present', 'absent', 'not_marked'])
+    present_count = serializers.IntegerField(required=False)
+    percentage = serializers.FloatField(required=False)
+
+class AttendanceSerializer(serializers.ModelSerializer):
+    students = StudentAttendanceSerializer(many=True)
+    class Meta:
+        model = Attendance
+        fields = '__all__'
 
 class ClassSerializer(serializers.ModelSerializer):
     class Meta:
