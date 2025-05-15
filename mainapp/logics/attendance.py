@@ -1,15 +1,14 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status as http_status
-from ..models import Attendance, Class, ClassWorkingDay, Student
-from ..serializers import AttendanceSerializer, ClassWorkingDaySerializer
+from ..models import Attendance, Class, ClassWorkingDay, Student, School
+from ..serializers import AttendanceSerializer
 from django.utils.dateparse import parse_date
 from datetime import date
 from django.db import transaction
 from django.db import IntegrityError
 from ..logics.email import send_email_sync
 import datetime, traceback
-from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
 # Add Attendance (POST API)
@@ -33,6 +32,7 @@ def add_attendance(request):
     if date_obj < class_obj.start_date:
         return Response({"message": "Attendance can only be added from class start date onwards"}, status=http_status.HTTP_400_BAD_REQUEST)
 
+    data["school"] = School.objects.get(id=data["school_id"]).name
     class_working_day, created = ClassWorkingDay.objects.get_or_create(
         school_id=data['school_id'], class_number=data['class_number'], defaults={'school': data['school'], 'working_days': {}}
     )
@@ -285,7 +285,7 @@ def get_attendance(request):
     except Attendance.DoesNotExist:
         # Instead of modifying request.data, create a new dictionary
         attendance_data = {
-            "school": request.GET.get("school"),
+            "school": School.objects.get(id=school_id).name,
             "school_id": school_id,
             "class_number": class_number,
             "date": date_str,

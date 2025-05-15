@@ -5,7 +5,6 @@ from rest_framework import status
 from ..models import Class, Teacher
 from ..serializers import ClassSerializer
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 
 
 @api_view(['GET'])
