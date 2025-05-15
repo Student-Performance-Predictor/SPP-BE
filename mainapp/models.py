@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -11,6 +11,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
     def __str__(self):
         return self.email
+
 
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
@@ -37,6 +38,7 @@ class Teacher(models.Model):
     def __str__(self):
         return f"{self.name} ({self.type})"
 
+
 @receiver(post_save, sender=User)
 def create_admin_teacher(sender, instance, created, **kwargs):
     if created and instance.is_superuser:
@@ -58,6 +60,7 @@ def create_admin_teacher(sender, instance, created, **kwargs):
             }
         )
 
+
 class School(models.Model):
     name = models.CharField(max_length=100)
     school_type = models.CharField(max_length=50)
@@ -73,3 +76,83 @@ class School(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+    
+
+class Attendance(models.Model):
+    STATUS_CHOICES = [
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('not_marked', 'Not Marked'),
+    ]
+
+    school = models.CharField(max_length=100)
+    school_id = models.CharField(max_length=100)
+    class_number = models.CharField(max_length=20)
+    date = models.DateField()
+
+    students = models.JSONField(default=list)
+
+    class Meta:
+        unique_together = ('school_id', 'class_number', 'date')
+        indexes = [
+            models.Index(fields=['school_id', 'class_number', 'date']),
+        ]
+        verbose_name_plural = "Class Attendances"
+
+    def __str__(self):
+        return f"{self.school} - Class {self.class_number} - {self.date}"
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            attendance_records = Attendance.objects.filter(
+                school_id=self.school_id,
+                class_number=self.class_number
+            )
+
+            present_count_map = {}
+            for record in attendance_records:
+                for s in record.students:
+                    if s['status'] == 'present':
+                        sid = s['student_id']
+                        present_count_map[sid] = present_count_map.get(sid, 0) + 1
+
+            # Get total working days for percentage calc
+            total_days = sum(
+                1 for entry in ClassWorkingDay.objects.filter(
+                    school_id=self.school_id,
+                    class_number=self.class_number
+                )
+                for day in entry.working_days.values() if day is True
+            )
+
+            # Process each student
+            for student in self.students:
+                student.setdefault('status', 'not_marked')
+                sid = student['student_id']
+                student['present_count'] = present_count_map.get(sid, 0)
+                student['percentage'] = (student['present_count'] / total_days * 100) if total_days else 0.0
+
+                self._sync_to_student_model(student)
+
+            super().save(*args, **kwargs)
+
+    def _calculate_present_days(self, student_id):
+        present_days = 0
+        records = Attendance.objects.filter(
+            school_id=self.school_id,
+            class_number=self.class_number
+        )
+
+        for record in records:
+            for s in record.students:
+                if s['student_id'] == student_id and s.get('status') == 'present':
+                    present_days += 1
+        return present_days
+
+    def _sync_to_student_model(self, student_data):
+        try:
+            student = Student.objects.get(student_id=student_data['student_id'])
+            student.attendance_percentage = student_data['percentage']
+            student.save()
+        except Student.DoesNotExist:
+            pass
