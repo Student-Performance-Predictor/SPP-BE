@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from ..serializers import TeacherSerializer
-from ..models import Teacher
+from ..models import Teacher, Class
 from ..logics.email import send_email_sync
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -28,9 +28,14 @@ def add_class_teacher(request):
         teacher_data["name"] = teacher_data["name"].title()
         username = teacher_data["name"].lower().replace(" ", "")
         email = teacher_data["email"].lower().strip()
+        class_assigned = teacher_data["class_assigned"]
         
         if User.objects.filter(email=email).exists():
             return Response({"error": "User with this email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if class_assigned:
+            if Teacher.objects.filter(school=teacher_data["school"], school_id=teacher_data["school_id"], class_assigned=class_assigned, type="class_teacher").exists():
+                return Response({"error": f"A class teacher for Class '{class_assigned}' already exists."}, status=status.HTTP_400_BAD_REQUEST)
         
         user = User.objects.create(username=username, email=email)
         
@@ -50,6 +55,20 @@ def add_class_teacher(request):
             profile_image=teacher_data.get("profile_image"),
             class_assigned=teacher_data.get("class_assigned")  # ⚡ Important
         )
+
+        # After teacher is created and before password is set
+        class_assigned = teacher.class_assigned
+        if class_assigned:
+            Class.objects.get_or_create(
+                school = teacher.school,
+                school_id = teacher.school_id,
+                class_number=class_assigned,
+                defaults={
+                    'total_working_days': 0,
+                    'threshold': 0
+                }
+            )
+
         
         year = teacher.date_of_birth.year
         password = f"{teacher.name.title().split(' ')[0]}@{year}{teacher.id}"
@@ -132,12 +151,19 @@ def delete_class_teacher(request, pk):
         teacher = Teacher.objects.get(pk=pk, type="class_teacher")
     except Teacher.DoesNotExist:
         return Response({"error": "Class Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
+    # Delete the class associated with this teacher (if any)
+    related_class = Class.objects.filter(class_number=teacher.class_assigned).first()
+    if related_class:
+        related_class.delete()
+
+    # Delete teacher's profile image if exists
     if teacher.profile_image and os.path.isfile(teacher.profile_image.path):
         os.remove(teacher.profile_image.path)
 
     teacher.user.delete()
 
+    # Send email
     email_subject = "Goodbye from EduMet - Account Has Been Permanently Removed"
     email_context = {
         'name': teacher.name,
@@ -153,3 +179,31 @@ def delete_class_teacher(request, pk):
     )
 
     return Response({"message": "Class Teacher deleted successfully"}, status=status.HTTP_200_OK)
+
+
+# Get Teacher Details from Access Token
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_teacher_from_token(request):
+    try:
+        teacher = Teacher.objects.get(user=request.user, type="class_teacher")
+    except Teacher.DoesNotExist:
+        return Response({"error": "Teacher not found or you are not a class teacher."}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = TeacherSerializer(teacher)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# Get All Teachers in the Same School
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_class_teachers_by_school(request):
+    try:
+        # Get the logged-in teacher or admin
+        requesting_teacher = Teacher.objects.get(user=request.user)
+    except Teacher.DoesNotExist:
+        return Response({"error": "You are not registered as a teacher."}, status=status.HTTP_404_NOT_FOUND)
+
+    teachers = Teacher.objects.filter(school_id=requesting_teacher.school_id, type="class_teacher")
+    serializer = TeacherSerializer(teachers, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
