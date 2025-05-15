@@ -78,6 +78,12 @@ class School(models.Model):
         return f"{self.name}"
 
 
+class ClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Class
+        fields = '__all__'
+
+
 class ClassWorkingDay(models.Model):
     school = models.CharField(max_length=100)
     school_id = models.CharField(max_length=100)
