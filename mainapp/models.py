@@ -12,6 +12,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
+
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
         ('admin', 'Admin'),
@@ -37,6 +38,7 @@ class Teacher(models.Model):
     def __str__(self):
         return f"{self.name} ({self.type})"
 
+
 @receiver(post_save, sender=User)
 def create_admin_teacher(sender, instance, created, **kwargs):
     if created and instance.is_superuser:
@@ -58,6 +60,7 @@ def create_admin_teacher(sender, instance, created, **kwargs):
             }
         )
 
+
 class School(models.Model):
     name = models.CharField(max_length=100)
     school_type = models.CharField(max_length=50)
@@ -73,3 +76,23 @@ class School(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+
+class ClassWorkingDay(models.Model):
+    school = models.CharField(max_length=100)
+    school_id = models.CharField(max_length=100)
+    class_number = models.CharField(max_length=10)
+    working_days = models.JSONField(default=dict)
+
+    @property
+    def total_working_days(self):
+        return sum(1 for day in self.working_days.values() if day is True)
+
+    class Meta:
+        unique_together = ('school_id', 'class_number')
+        indexes = [
+            models.Index(fields=['school_id', 'class_number']),
+        ]
+
+    def __str__(self):
+        return f"{self.school} - Class {self.class_number} - {self.total_working_days} Working Days"
