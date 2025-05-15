@@ -11,6 +11,7 @@ import io
 from django.db import transaction
 from django.http import HttpResponse
 
+
 # Get All Students in the Same School
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -44,7 +45,6 @@ def get_all_class_students(request, class_number):
 @permission_classes([IsAuthenticated])
 def add_student(request):
     try:
-        # Ensure the user is a teacher
         teacher = Teacher.objects.get(user=request.user)
     except Teacher.DoesNotExist:
         return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -85,7 +85,7 @@ def add_student(request):
                     "name": student.full_name,
                     "email": student.email,
                     "phone": student.phone,
-                    "status": "not_marked",  # Default status for new students
+                    "status": "not_marked",
                     "present_count": 0,
                     "percentage": 0.0
                 })
@@ -201,6 +201,7 @@ def export_students(request):
     )
     response['Content-Disposition'] = f'attachment; filename={fileName}.csv'
     return response
+
 
 # Import Students Data
 @api_view(['POST'])
