@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Low Attendance Alert</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo {
+            color: #3a7bd5;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #d9534f;
+            margin-top: 0;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        .attendance-details {
+            background-color: #f8f9fa;
+            border-left: 4px solid #d9534f;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th {
+            text-align: left;
+            padding: 8px 0;
+            color: #2c3e50;
+            width: 40%;
+        }
+        td {
+            padding: 8px 0;
+            color: #7f8c8d;
+        }
+        .highlight {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .action-button {
+            display: inline-block;
+            background-color: #3a7bd5;
+            color: white !important;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">EduMet</div>
+            <h2>
+                <span>📉 Low Attendance Alert</span>
+            </h2>
+        </div>
+        
+        <p>Dear <strong>{{ name }}</strong> (ID: {{ student_id }}),</p>
+        
+        <p>We're writing to inform you that your attendance has dropped below the acceptable threshold. Regular attendance is crucial for your academic success.</p>
+        
+        <div class="attendance-details">
+            <table>
+                <tr>
+                    <th>Present Days</th>
+                    <td>{{ present_count }}</td>
+                </tr>
+                <tr>
+                    <th>Total Working Days</th>
+                    <td>{{ total_working_days }}</td>
+                </tr>
+                <tr>
+                    <th>Attendance Percentage</th>
+                    <td class="highlight">{{ percentage }}%</td>
+                </tr>
+            </table>
+        </div>
+
+        <p>Please make sure to attend all upcoming classes regularly.</p>
+        <p>We're here to support your learning journey. Don't hesitate to reach out if you need assistance.</p>
+
+        <div class="footer">
+            <p>Best regards,<br><strong>The EduMet Team</strong></p>
+            <p style="font-size: 12px; color: #95a5a6;">
+                © {{ current_year }} EduMet Platform. All rights reserved.<br>
+                This is an automated notification - please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
