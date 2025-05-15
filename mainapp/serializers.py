@@ -33,3 +33,8 @@ class ClassWorkingDaySerializer(serializers.ModelSerializer):
     def get_total_working_days(self, obj):
         # Calculate the total working days based on the `working_days` field
         return sum(1 for day, is_working in obj.working_days.items() if is_working)
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields ='__all__'

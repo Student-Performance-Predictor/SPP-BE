@@ -46,7 +46,7 @@ def add_principal(request):
             state = teacher_data["state"],
             pincode = teacher_data["pincode"],
             profile_image = teacher_data.get("profile_image"),
-            class_assigned = "1-8"
+            class_assigned = "0"
         )
         year = teacher.date_of_birth.year
         password = f"{teacher.name.title().split(" ")[0]}@{year}{teacher.id}"
@@ -112,7 +112,7 @@ def update_principal(request, pk):
         user.save()
         return Response({"message":"Principal updated successfully!"},status=status.HTTP_200_OK)
     return Response({
-        "message": "Failed to add school.",
+        "message": "Failed to add principal.",
         "errors": serializer.errors
     },status=status.HTTP_400_BAD_REQUEST)
 
@@ -144,3 +144,15 @@ def delete_principal(request, pk):
     )
     
     return Response({"message":"Principal deleted Successfully"},status=status.HTTP_200_OK)
+
+# Get Principal Details from Access Token
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_principal_from_token(request):
+    try:
+        teacher = Teacher.objects.get(user=request.user, type="principal")
+    except Teacher.DoesNotExist:
+        return Response({"error": "Principal not found or you are not a principal."}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = TeacherSerializer(teacher)
+    return Response(serializer.data, status=status.HTTP_200_OK)
