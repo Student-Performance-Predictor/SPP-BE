@@ -52,3 +52,58 @@ def validate_token(request):
     Function-based view to validate JWT token.
     """
     return Response({"valid": True}, status=status.HTTP_200_OK)
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_password(request):
+    """
+    API to update the password of the logged-in user.
+    Expected fields: old_password, new_password, confirm_password
+    """
+    user = request.user
+    data = request.data
+
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    confirm_password = data.get("confirm_password")
+
+    # Check all fields are provided
+    if not old_password or not new_password or not confirm_password:
+        return Response(
+            {"error": "All fields (old_password, new_password, confirm_password) are required."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Check old password is correct
+    if not user.check_password(old_password):
+        return Response(
+            {"error": "Old password is incorrect."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    # Check new and confirm passwords match
+    if new_password != confirm_password:
+        return Response(
+            {"error": "New password and confirm password do not match."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Optional: Check if new password is different from old
+    if old_password == new_password:
+        return Response(
+            {"error": "New password must be different from the old password."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Optional: Add custom password policy (e.g., min length)
+    if len(new_password) < 8:
+        return Response(
+            {"error": "New password must be at least 8 characters long."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Update password
+    user.set_password(new_password)
+    user.save()
+
+    return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
