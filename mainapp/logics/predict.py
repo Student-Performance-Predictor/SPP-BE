@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from sppml.predict import predict_single, predict_bulk
-from ..models import Student, Class, Teacher
+from ..models import Student, Teacher
 from rest_framework.parsers import MultiPartParser
 import pandas as pd
 import io
