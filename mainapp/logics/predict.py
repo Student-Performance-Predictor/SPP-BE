@@ -66,9 +66,7 @@ def predict_bulk_final_grades(request):
             return Response({"error": "Bulk prediction failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Update final_grade with predicted values instead of creating new column
-        df["final_grade"] = result_df["Predicted_Final_Grade"].apply(
-            lambda x: 97 if x >= 100 else x
-        )
+        df["final_grade"] = result_df["Predicted_Final_Grade"]
 
         # Save predictions to database
         success_count = 0
