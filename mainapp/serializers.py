@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import School, Teacher, Class, ClassWorkingDay, Attendance
+from .models import School, Teacher, Class, ClassWorkingDay, Attendance, Student
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
