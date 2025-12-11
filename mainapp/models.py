@@ -13,7 +13,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
-
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
         ('admin', 'Admin'),
@@ -38,7 +37,6 @@ class Teacher(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.type})"
-
 
 @receiver(post_save, sender=User)
 def create_admin_teacher(sender, instance, created, **kwargs):
