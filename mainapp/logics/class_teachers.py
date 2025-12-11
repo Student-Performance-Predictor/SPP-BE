@@ -26,7 +26,6 @@ def add_class_teacher(request):
     if serializer.is_valid():
         teacher_data = serializer.validated_data
         teacher_data["name"] = teacher_data["name"].title()
-        username = teacher_data["name"].lower().replace(" ", "")
         email = teacher_data["email"].lower().strip()
         class_assigned = teacher_data["class_assigned"]
         
@@ -37,7 +36,7 @@ def add_class_teacher(request):
             if Teacher.objects.filter(school=teacher_data["school"], school_id=teacher_data["school_id"], class_assigned=class_assigned, type="class_teacher").exists():
                 return Response({"error": f"A class teacher for Class '{class_assigned}' already exists."}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = User.objects.create(username=username, email=email)
+        user = User.objects.create(email=email)
         
         teacher = Teacher.objects.create(
             user=user,
@@ -80,7 +79,6 @@ def add_class_teacher(request):
             'type': 'Class Teacher',
             'name': teacher.name,
             'email': teacher.email,
-            'username': username,
             'password': password,
             'school': teacher.school,
             'current_year': datetime.datetime.now().year
@@ -130,8 +128,6 @@ def update_class_teacher(request, pk):
     if serializer.is_valid():
         serializer.save()
         user = teacher.user
-        if "name" in serializer.validated_data:
-            user.username = serializer.validated_data["name"].lower().replace(" ", "")
         if "email" in serializer.validated_data:
             user.email = serializer.validated_data["email"]
         user.save()

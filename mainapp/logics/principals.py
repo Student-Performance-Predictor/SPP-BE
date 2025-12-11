@@ -26,12 +26,11 @@ def add_principal(request):
     if serializer.is_valid():
         teacher_data = serializer.validated_data
         teacher_data["name"] = teacher_data["name"].title()
-        username = teacher_data["name"].lower().replace(" ","")
         email = teacher_data["email"].lower().strip()
         if User.objects.filter(email=email).exists():
             return Response({"error": "User with this email already exists"}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = User.objects.create(username=username,email=email)
+        user = User.objects.create(email=email)
         teacher = Teacher.objects.create(
             user=user,
             name = teacher_data["name"],
@@ -58,7 +57,6 @@ def add_principal(request):
             'type': 'Principal',
             'name': teacher.name,
             'email': teacher.email,
-            'username': username,
             'password': password,
             'school': teacher.school,
             'current_year': datetime.datetime.now().year
@@ -105,8 +103,6 @@ def update_principal(request, pk):
     if serializer.is_valid():
         serializer.save()
         user = teacher.user
-        if "name" in serializer.validated_data:
-            user.username = serializer.validated_data["name"].lower().replace(" ","")
         if "email" in serializer.validated_data:
             user.email = serializer.validated_data["email"]
         user.save()
