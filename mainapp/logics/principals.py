@@ -49,7 +49,7 @@ def add_principal(request):
             class_assigned = "0"
         )
         year = teacher.date_of_birth.year
-        password = f"{teacher.name.title().split(" ")[0]}@{year}{teacher.id}"
+        password = f"{teacher.name.title().split(' ')[0]}@{year}{teacher.id}"
         user.set_password(password)
         user.save()
 
