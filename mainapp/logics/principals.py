@@ -113,6 +113,21 @@ def update_principal(request, pk):
     },status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def mfa_update_principal(request, pk):
+    try:
+        teacher = Teacher.objects.get(pk=pk, type="principal")
+    except Teacher.DoesNotExist:
+        return Response({"error":"Principal not found"},status=status.HTTP_404_NOT_FOUND)
+    mfa_enabled = request.data.get("mfa_enabled")
+    if mfa_enabled is None:
+        return Response({"error":"mfa_enabled field is required"},status=status.HTTP_400_BAD_REQUEST)
+    teacher.mfa_enabled = mfa_enabled
+    teacher.save()
+    return Response({"message":"MFA setting updated successfully!"},status=status.HTTP_200_OK)
+
+
 # Delete Principal by Id
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
@@ -140,6 +155,7 @@ def delete_principal(request, pk):
     )
     
     return Response({"message":"Principal deleted Successfully"},status=status.HTTP_200_OK)
+
 
 # Get Principal Details from Access Token
 @api_view(['GET'])
