@@ -1,4 +1,7 @@
 from django.contrib.auth import authenticate
+from ..models import Teacher, EmailOTP
+import random, datetime
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -6,13 +9,17 @@ from ..serializers import LoginSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from .email import send_email_background
+from django.conf import settings
+from cryptography.fernet import InvalidToken
+
 User = get_user_model()
-from ..models import Teacher 
 
 # Login with Email and Password
 @api_view(["POST"])
 def login(request):
     serializer = LoginSerializer(data=request.data)
+
     if serializer.is_valid():
         email = serializer.validated_data["email"].lower().strip()
         password = serializer.validated_data["password"]
@@ -20,29 +27,148 @@ def login(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        
+            return Response({"error": "Invalid credentials"}, status=401)
+
         user = authenticate(email=email, password=password)
 
-        if user is not None:
-            try:
-                teacher = Teacher.objects.get(user=user)
-                user_type = teacher.type
-                user_id = teacher.id
-            except Teacher.DoesNotExist:
-                user_type = "unknown"
-                user_id = None
+        if user is None:
+            return Response({"error": "Invalid credentials"}, status=401)
 
+        try:
+            teacher = Teacher.objects.get(user=user)
+        except Teacher.DoesNotExist:
+            return Response({"error": "Account is not linked to teacher"}, status=401)
+
+        user_type = teacher.type
+        user_id = teacher.id
+        mfa_enabled = teacher.mfa_enabled
+
+        if not mfa_enabled:
             refresh = RefreshToken.for_user(user)
             return Response({
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "type": user_type,
-                "id": user_id
-            })
-        else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                "id": user_id,
+                "mfa": False,
+                "message": "Login successful"
+            }, status=200)
+
+        otp = create_otp_for_user(user)
+
+        context = {"otp": otp, "name": teacher.name, "current_year": timezone.now().year}
+        send_email_background(
+            subject="Your EduMet Login OTP",
+            template_name="emails/otp_email.html",
+            context=context,
+            recipient_email=email
+        )
+
+        return Response({
+            "message": f"OTP sent to {email}",
+            "mfa": True,
+            "email": email,
+            "id": user_id,
+            "type": user_type
+        }, status=200)
+
+    return Response(serializer.errors, status=400)
+
+# OTP Functionality
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def encrypt_otp(otp: str) -> str:
+    fernet = settings.FERNET
+    return fernet.encrypt(otp.encode()).decode()
+
+def decrypt_otp(encrypted_otp: str) -> str:
+    fernet = settings.FERNET
+    try:
+        return fernet.decrypt(encrypted_otp.encode()).decode()
+    except InvalidToken:
+        return None
+
+def create_otp_for_user(user):
+    otp = generate_otp()
+    encrypted = encrypt_otp(otp)
+    expiry = timezone.now() + datetime.timedelta(minutes=10)
+
+    EmailOTP.objects.update_or_create(
+        user=user,
+        defaults={"otp_encrypted": encrypted, "expires_at": expiry}
+    )
+
+    return otp
+
+@api_view(["POST"])
+def resend_otp(request):
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"error": "Email is required"}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+        teacher = Teacher.objects.get(user=user)
+        otp_obj = EmailOTP.objects.get(user=user)
+    except:
+        return Response({"error": "User not found"}, status=404)
+
+    if not teacher.mfa_enabled:
+        return Response({"error": "MFA is not enabled"}, status=400)
+
+    otp_obj.otp = generate_otp()
+    otp_obj.expires_at = timezone.now() + datetime.timedelta(minutes=10)
+    otp_obj.save()
+
+    context = {"otp": otp_obj.otp, "name": teacher.name, "current_year": timezone.now().year}
+    
+    send_email_background(
+        subject="Your EduMet Login OTP (Resent)",
+        template_name="emails/otp_email.html",
+        context=context,
+        recipient_email=email
+    )
+
+    return Response({"message": "OTP resent successfully"})
+
+@api_view(["POST"])
+def verify_otp(request):
+    email = request.data.get("email")
+    otp_entered = request.data.get("otp")
+
+    if not email or not otp_entered:
+        return Response({"error": "Email and OTP are required"}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+        teacher = Teacher.objects.get(user=user)
+        otp_obj = EmailOTP.objects.get(user=user)
+    except:
+        return Response({"error": "Invalid request"}, status=404)
+
+    if timezone.now() > otp_obj.expires_at:
+        return Response({"error": "OTP expired"}, status=400)
+
+    decrypted_otp = decrypt_otp(otp_obj.otp_encrypted)
+
+    if not decrypted_otp or decrypted_otp != otp_entered:
+        return Response({"error": "Invalid OTP"}, status=400)
+
+    otp_obj.delete()
+
+    # Issue JWT tokens
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "message": "OTP verified successfully",
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "type": teacher.type,
+        "id": teacher.id,
+        "mfa": True
+    }, status=200)
 
 # Validate Token
 @api_view(["GET"])
