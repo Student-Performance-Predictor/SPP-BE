@@ -26,12 +26,11 @@ def add_principal(request):
     if serializer.is_valid():
         teacher_data = serializer.validated_data
         teacher_data["name"] = teacher_data["name"].title()
-        username = teacher_data["name"].lower().replace(" ","")
         email = teacher_data["email"].lower().strip()
         if User.objects.filter(email=email).exists():
             return Response({"error": "User with this email already exists"}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = User.objects.create(username=username,email=email)
+        user = User.objects.create(email=email)
         teacher = Teacher.objects.create(
             user=user,
             name = teacher_data["name"],
@@ -49,7 +48,7 @@ def add_principal(request):
             class_assigned = "0"
         )
         year = teacher.date_of_birth.year
-        password = f"{teacher.name.title().split(" ")[0]}@{year}{teacher.id}"
+        password = f"{teacher.name.title().split(' ')[0]}@{year}{teacher.id}"
         user.set_password(password)
         user.save()
 
@@ -58,7 +57,6 @@ def add_principal(request):
             'type': 'Principal',
             'name': teacher.name,
             'email': teacher.email,
-            'username': username,
             'password': password,
             'school': teacher.school,
             'current_year': datetime.datetime.now().year
@@ -105,8 +103,6 @@ def update_principal(request, pk):
     if serializer.is_valid():
         serializer.save()
         user = teacher.user
-        if "name" in serializer.validated_data:
-            user.username = serializer.validated_data["name"].lower().replace(" ","")
         if "email" in serializer.validated_data:
             user.email = serializer.validated_data["email"]
         user.save()
@@ -115,6 +111,21 @@ def update_principal(request, pk):
         "message": "Failed to add principal.",
         "errors": serializer.errors
     },status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def mfa_update_principal(request, pk):
+    try:
+        teacher = Teacher.objects.get(pk=pk, type="principal")
+    except Teacher.DoesNotExist:
+        return Response({"error":"Principal not found"},status=status.HTTP_404_NOT_FOUND)
+    mfa_enabled = request.data.get("mfa_enabled")
+    if mfa_enabled is None:
+        return Response({"error":"mfa_enabled field is required"},status=status.HTTP_400_BAD_REQUEST)
+    teacher.mfa_enabled = mfa_enabled
+    teacher.save()
+    return Response({"message":"MFA setting updated successfully!"},status=status.HTTP_200_OK)
 
 
 # Delete Principal by Id
@@ -144,6 +155,7 @@ def delete_principal(request, pk):
     )
     
     return Response({"message":"Principal deleted Successfully"},status=status.HTTP_200_OK)
+
 
 # Get Principal Details from Access Token
 @api_view(['GET'])
