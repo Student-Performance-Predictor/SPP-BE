@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your EduMet OTP</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo {
+            color: #3a7bd5;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        .otp-box {
+            background-color: #f1f5ff;
+            border-left: 4px solid #3a7bd5;
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .otp-code {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="logo">EduMet</div>
+        <h2>Hello {{ name }},</h2>
+    </div>
+
+    <p>Your One-Time Password (OTP) for accessing your EduMet account is shown below.</p>
+
+    <div class="otp-box">
+        <div class="otp-code">{{ otp }}</div>
+    </div>
+
+    <p>This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
+
+    <p>If you didn't request this OTP, someone may be trying to access your account. Please reset your password immediately or contact support.</p>
+
+    <div class="footer">
+        <p>Best regards,<br><strong>The EduMet Admin Team</strong></p>
+        <p style="font-size: 12px; color: #95a5a6;">
+            © {{ current_year }} EduMet Platform. All rights reserved.<br>
+            If this was not you, please contact edumetspp@gmail.com immediately.
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
