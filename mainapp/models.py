@@ -98,6 +98,7 @@ class Student(models.Model):
     prev_grade2 = models.FloatField()
     final_grade = models.FloatField()
 
+
     def __str__(self):
         return f"{self.full_name} - {self.student_id}"
 
