@@ -112,18 +112,32 @@ def resend_otp(request):
         user = User.objects.get(email=email)
         teacher = Teacher.objects.get(user=user)
         otp_obj = EmailOTP.objects.get(user=user)
-    except:
+    except User.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
+    except Teacher.DoesNotExist:
+        return Response({"error": "Teacher not found"}, status=404)
+    except EmailOTP.DoesNotExist:
+        return Response({"error": "OTP not generated yet"}, status=404)
 
     if not teacher.mfa_enabled:
         return Response({"error": "MFA is not enabled"}, status=400)
 
-    otp_obj.otp = generate_otp()
+    # 🔐 Generate & encrypt OTP
+    otp = generate_otp()
+    encrypted_otp = encrypt_otp(otp)
+
+    # ⏳ Update OTP and expiry
+    otp_obj.otp_encrypted = encrypted_otp
     otp_obj.expires_at = timezone.now() + datetime.timedelta(minutes=10)
     otp_obj.save()
 
-    context = {"otp": otp_obj.otp, "name": teacher.name, "current_year": timezone.now().year}
-    
+    # 📧 Email context (send plain OTP only via email)
+    context = {
+        "otp": otp,
+        "name": teacher.name,
+        "current_year": timezone.now().year
+    }
+
     send_email_background(
         subject="Your EduMet Login OTP (Resent)",
         template_name="emails/otp_email.html",
@@ -131,7 +145,7 @@ def resend_otp(request):
         recipient_email=email
     )
 
-    return Response({"message": "OTP resent successfully"})
+    return Response({"message": "OTP resent successfully"}, status=200)
 
 @api_view(["POST"])
 def verify_otp(request):
