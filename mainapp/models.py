@@ -35,7 +35,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
-
 class Teacher(models.Model):
     TEACHER_TYPE_CHOICES = [
         ('admin', 'Admin'),
@@ -148,7 +147,6 @@ class Class(models.Model):
     def __str__(self):
         return f"Class {self.class_number} - {self.total_working_days} Working Days"
       
-
 class ClassWorkingDay(models.Model):
     school = models.CharField(max_length=100)
     school_id = models.CharField(max_length=100)
@@ -167,6 +165,7 @@ class ClassWorkingDay(models.Model):
 
     def __str__(self):
         return f"{self.school} - Class {self.class_number} - {self.total_working_days} Working Days"
+
 
 
 class Attendance(models.Model):
